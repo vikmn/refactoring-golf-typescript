@@ -9,10 +9,17 @@ export class Money {
         this.value = value;
         this.currency = currency;
     }
+
+    plus(other: Money): Money {
+        if (other.currency !== this.currency) {
+            throw new Incalculable();
+        }
+        return new Money(this.value + other.value, other.currency);
+    }
 }
 
 export class Takehomecalculator {
-    private percent: number
+    private percent: number;
 
     constructor(percent: number) {
         this.percent = percent;
@@ -21,17 +28,13 @@ export class Takehomecalculator {
     netAmount(first: Money, ...rest : Money[] ): Money {
 
         const monies: Array<Money> = Array.from(rest);
-        let total: Money = first
-
-        for (let next of monies) {
-            if (next.currency !== total.currency) {
-                throw new Incalculable()
-            }
-        }
+        let total: Money = first;
 
         for (const next of monies) {
-            total = new Money(total.value + next.value, next.currency)
+            total = total.plus(next);
+
         }
+
 
         const amount:number = total.value * (this.percent / 100.0 );
         const tax: Money = new Money(Math.trunc(amount), first.currency);
@@ -41,5 +44,6 @@ export class Takehomecalculator {
         }
         return new Money(total.value - tax.value, first.currency)
     }
+
 
 }
